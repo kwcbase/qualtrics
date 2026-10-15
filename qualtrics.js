@@ -7,8 +7,8 @@
 
   // In-app survey pop-up. Qualtrics intercepts don't render inside the Staffbase app,
   // so in the app we show our own modal and use Qualtrics only to host the survey.
-  var SURVEY_ID = "SV_xxxxxxxxxxxxxxx"; // TODO: Qualtrics survey ID
-  var SURVEY_URL = "https://<brand>.qualtrics.com/jfe/form/" + SURVEY_ID; // TODO: anonymous survey link
+  var SURVEY_ID = "SV_8207NCK60jdakho"; // same survey the web intercept SI_emTS87kwARkdqt0 targets
+  var SURVEY_URL = "https://krogerxmit.iad1.qualtrics.com/jfe/form/" + SURVEY_ID; // anonymous survey link
   var SURVEY_PERSON_PARAM = "personnumber"; // must match the embedded data field name in the survey flow
   var SURVEY_SEEN_KEY = "kroger_survey_seen_" + SURVEY_ID;
 
