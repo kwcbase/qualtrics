@@ -246,37 +246,45 @@
       "display:flex;flex-direction:column;width:92vw;max-width:600px;height:80vh;" +
       "background:#fff;border-radius:12px;overflow:hidden";
 
-    var header = document.createElement("div");
-    header.style.cssText =
-      "display:flex;justify-content:space-between;align-items:center;padding:8px 12px;" +
-      "border-bottom:1px solid #e5e5e5;font:14px -apple-system,system-ui,sans-serif";
-
-    // Fallback if the survey can't be shown inside the frame. What target=_blank does in the app is untested.
-    var openLink = document.createElement("a");
-    openLink.href = surveyUrl;
-    openLink.target = "_blank";
-    openLink.rel = "noopener";
-    openLink.textContent = "Open in browser";
-
-    var close = document.createElement("button");
-    close.type = "button";
-    close.textContent = "×";
-    close.setAttribute("aria-label", "Close survey");
-    close.style.cssText =
-      "font-size:28px;line-height:1;background:none;border:0;padding:4px 8px;cursor:pointer";
-    close.onclick = function () {
-      overlay.remove();
-      document.body.style.overflow = previousOverflow;
-    };
-
     var frame = document.createElement("iframe");
     frame.src = surveyUrl;
     frame.title = "Survey";
     frame.style.cssText = "flex:1;width:100%;border:0";
 
-    header.appendChild(openLink);
-    header.appendChild(close);
-    box.appendChild(header);
+    function closeModal() {
+      if (!overlay.parentNode) {
+        return;
+      }
+
+      overlay.remove();
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("message", onSurveyMessage);
+    }
+
+    // No close button: tapping the dimmed area outside the survey closes it.
+    overlay.onclick = function (e) {
+      if (e.target === overlay) {
+        closeModal();
+      }
+    };
+
+    // Qualtrics posts "QualtricsEOS|<surveyId>|<sessionId>" to the parent page when the survey ends
+    // (more than once). Close after a short delay so the end-of-survey message is seen.
+    function onSurveyMessage(e) {
+      if (!/^https:\/\/[^\/]+\.qualtrics\.com$/.test(e.origin)) {
+        return;
+      }
+
+      if (typeof e.data !== "string" || e.data.indexOf("QualtricsEOS|" + SURVEY_ID + "|") !== 0) {
+        return;
+      }
+
+      window.removeEventListener("message", onSurveyMessage);
+      setTimeout(closeModal, 3000);
+    }
+
+    window.addEventListener("message", onSurveyMessage);
+
     box.appendChild(frame);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
